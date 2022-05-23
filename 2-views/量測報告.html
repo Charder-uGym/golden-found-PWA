@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <title></title>
+      <link rel="stylesheet" href="styles/kendo.common.min.css" />
+      <link rel="stylesheet" href="styles/kendo.default.min.css" />
+      <link rel="stylesheet" href="styles/kendo.mobile.all.min.css" />
+
+      <script src="js/jquery.min.js"></script>
+      <script src="js/kendo.all.min.js"></script>    
+  </head>
+  
+  <body>
+
+    <div data-role="view" data-show="kendoReady()"  data-title="量測報告" style="text-align: center;font-family: 'Noto Sans TC'" data-use-native-scrolling="true">
+
+      <div data-role="content" style="background-color: white;"> 
+
+        <a id="週按鈕" style="font-size: 18px; color: white; float:left;margin-left:15px; margin-top:20px; background-color:#FF4350; padding:5px;border-radius:8px; width:50px" onclick="displayChartsInWeek()">週</a> 
+        
+        <a id="月按鈕" style="font-size: 18px; color: white; float:left;margin-left:15px;  margin-top:20px; background-color:lightgray; padding:5px;border-radius:8px; width:50px" onclick="displayChartsInMonth()">月</a>   
+              
+        <a id="全部按鈕" style="font-size: 18px; color: white; float:left;margin-left:15px;  margin-top:20px; background-color:lightgray
+        ; padding:5px;border-radius:8px; width:50px" onclick="displayChartsInAll()">全部</a> 
+        
+        <div style="height: 60px"></div>
+           
+        <hr>
+
+          <div style="height:10px"></div>
+          <div>
+            <label id="chart_range" style="margin: auto">日期時間</label>
+          </div>
+  
+          <div style="float:left;width:100px;margin-top:-42px">
+            <a id="left-arrow" style="font-size: 48px; color:#FF4350; float:left; margin-left:10px; padding:10px;" onclick="chartMovePrev()"><i class="fa fa-caret-left" aria-hidden="true"></i></a> 
+          </div>
+          <div style="float:right;width:100px;margin-top:-42px">            
+            <a id="right-arrow" style="font-size: 48px; color:#FF4350; float:right;margin-right:10px; padding:10px;border-radius:8px" onclick="chartMoveNext()"><i class="fa fa-caret-right" aria-hidden="true"></i></a> 
+          </div>
+                 
+        <canvas id="myChartRightHand" width="400px" height="200px" style="margin:10px"></canvas>   
+          
+        <canvas id="myChartLeftHand" width="400px" height="200px" style="margin:10px"></canvas>   
+
+<!--        
+        <a class="" style="font-size: 26px; color:#FF4350; float:left;margin-left:100px; font-weight:bold; background-color:lightgray
+        ; padding:10px;border-radius:8px " onclick=""><</a>    
+        
+        <a class="" style="font-size: 26px; color:#FF4350; float:right;margin-right:100px; font-weight:bold; background-color:lightgray
+        ; padding:10px;border-radius:8px " onclick="">></a>   
+-->
+                 
+      </div>        
+    </div>
+    
+    <script>
+      // 時區時間差
+      var timeZoneOffset = new Date().getTimezoneOffset();
+      console.log(timeZoneOffset); // if offset equals -60 then the time zone offset is UTC+01
+                                   // In Taiwan, offset is -480 min
+      var UTC_delta = timeZoneOffset/(-60); // +8 in Taiwan
+      
+      var hrefString = window.location.href;
+      var inputParamString = hrefString.split("?");
+      var inputParam = inputParamString[2].split("&")
+      
+        
+      var keyOfMeasurements;
+      var selTime;
+      var selTimeStr;    
+      var selMonth;
+      var selDate;
+      var selDay;    
+      var chartCenterDate;
+      
+      var weekDataForCharts=[];    
+      
+      var weekDataForRightHand=[];      
+      var weekDataForLeftHand=[];      
+      var weekDataForDyno=[];  
+      
+      var monthDataForRightHand=[];      
+      var monthDataForLeftHand=[];      
+      var monthDataForDyno=[]; 
+      
+      var allDataForRightHand=[];      
+      var allDataForLeftHand=[];      
+      var allDataForDyno=[]; 
+      
+      var weekLabelsforChart=[];      
+      var monthLabelsforChart=[];
+      var allLabelsforChart=[];
+
+      var ctx;
+      var myChartRightHand;      
+      var myChartLeftHand;          
+      
+      var chartRange=0; //0:week, 1:month, 2:all
+      var 所有量測數據;
+      
+      //==================================
+      // simualte data for test 
+//      weekLabelsforChart=[
+//        '2022/03/21', '2022/03/22', '2022/03/23', '2022/03/24', '2022/03/25', '2022/03/26', '2022/03/27'
+//      ];
+//
+//      for (var i=0; i<30;i++) monthLabelsforChart[i]="";
+//      monthLabelsforChart[0]  = '2022/03/01';
+//      monthLabelsforChart[29] = '2022/03/30';
+      
+      
+      // simulate for a year
+      for (var i=0; i<365;i++) allLabelsforChart[i]="";        
+
+      // rnd week data for test
+      for (var i=0; i<7;i++){
+        weekDataForRightHand[i]=Math.floor(Math.random()*50)/10+170;
+      }
+      //console.log(weekDataForRightHand);
+
+      // rnd month data for test
+      for (var i=0; i<30;i++){
+        monthDataForRightHand[i]=Math.floor(Math.random()*50)/10+170;
+      }
+      //console.log(monthDataForRightHand); 
+      
+      // rnd year data for test all
+      for (var i=0; i<365;i++){
+        allDataForRightHand[i]=Math.floor(Math.random()*50)/10+170;
+      }
+      //console.log(allDataForRightHand);       
+      //=================================
+      
+      // Kendo is ready
+      function kendoReady(){
+        console.log("Show Data", inputParam);
+        console.log("取得量測記錄");
+      
+        讀取量測數據ForChart();   
+        
+        console.log("here", $("#dummy").css("height"));
+     
+      }
+            
+      async function 讀取量測數據ForChart() {
+        var paramToSend = "?API=33" + "&UserId=" + $("#formDYNO_ID").val(); 
+        console.log(paramToSend);
+        var resStr = await callAPI(paramToSend, '讀取量測記錄'); //callAPI defined in functions.js
+
+        console.log(inputParam);
+        所有量測數據=JSON.parse(resStr); 
+        console.log(所有量測數據); 
+        
+        var keys=inputParam[1].split('_');
+        chartCenterDate=parseInt(keys[1]);
+        console.log("aaaa", chartCenterDate);
+        getDataOfAweek(chartCenterDate);
+        
+        
+        //console.log("畫圖")
+        drawChart();  
+
+      }
+     
+      // Update charts examples
+      // myChartRightHand.options.scales.x.display=true;
+      // myChartRightHand.update()
+      
+      // myChartRightHand.options.scales.y.min=40
+      // myChartRightHand.update() 
+      
+      function displayChartsInWeek(){
+        console.log("Display Charts in week range");
+        chartRange=0;
+        $("#週按鈕").css("background-color","#FF4350");
+        $("#月按鈕").css("background-color","lightgray");
+        $("#全部按鈕").css("background-color","lightgray");   
+        
+        $("#left-arrow").css("color","#FF4435");
+        $("#right-arrow").css("color","#FF4435");
+        
+        getDataOfAweek(chartCenterDate);
+        $("#chart_range").text(weekLabelsforChart[0].substr(0,10)+" ~ "+weekLabelsforChart[weekLabelsforChart.length-1].substr(0,10));
+        
+        myChartRightHand.data.labels=weekLabelsforChart;
+        myChartLeftHand.data.labels=weekLabelsforChart;
+        
+        myChartRightHand.data.datasets[0].data=weekDataForRightHand; 
+        myChartLeftHand.data.datasets[0].data=weekDataForRightHand; 
+        
+        myChartRightHand.options.scales.x.display=true;
+        myChartLeftHand.options.scales.x.display=true;
+        
+        myChartRightHand.update();                 
+        myChartLeftHand.update();                                 
+        
+      }
+
+      function displayChartsInMonth(){
+        console.log("Display Charts in month range");
+        chartRange=1;
+        $("#週按鈕").css("background-color","lightgray");
+        $("#月按鈕").css("background-color","#FF4350");
+        $("#全部按鈕").css("background-color","lightgray");
+        
+        $("#left-arrow").css("color","#FF4435");
+        $("#right-arrow").css("color","#FF4435");        
+        
+        getDataOfAmonth(chartCenterDate);
+        $("#chart_range").text(monthLabelsforChart[0].substr(0,10)+" ~ "+monthLabelsforChart[monthLabelsforChart.length-1].substr(0,10));
+        myChartRightHand.data.labels=monthLabelsforChart;
+        myChartLeftHand.data.labels=monthLabelsforChart;
+        
+        myChartRightHand.data.datasets[0].data=monthDataForRightHand;
+        myChartLeftHand.data.datasets[0].data=monthDataForLeftHand;
+        
+        myChartRightHand.options.scales.x.display=false;        
+        myChartLeftHand.options.scales.x.display=false;           
+      
+        myChartRightHand.update();          
+        myChartLeftHand.update();                          
+      }
+      
+      function displayChartsInAll(){
+        console.log("Display Charts in all");
+        chartRange=3;
+        $("#週按鈕").css("background-color","lightgray");
+        $("#月按鈕").css("background-color","lightgray");
+        $("#全部按鈕").css("background-color","#FF4350");     
+        
+        $("#left-arrow").css("color","lightgray");
+        $("#right-arrow").css("color","lightgray");        
+        
+        getDataOfAll();
+        
+        $("#chart_range").text(allLabelsforChart[0].substr(0,10)+" ~ "+allLabelsforChart[allLabelsforChart.length-1].substr(0,10));        
+        
+        myChartRightHand.data.labels=allLabelsforChart;
+        myChartLeftHand.data.labels=allLabelsforChart;
+        
+        myChartRightHand.data.datasets[0].data=allDataForRightHand;
+        myChartLeftHand.data.datasets[0].data=allDataForLeftHand;
+                
+        myChartRightHand.options.scales.x.display=false; 
+        myChartLeftHand.options.scales.x.display=false;  
+        
+        myChartRightHand.update();        
+        myChartLeftHand.update();              
+      }      
+      
+      function chartMovePrev(){
+        if (chartRange==0) { // move prev one day
+          console.log("Move to Prev day");
+                    
+          // 取前一天資料
+          getWeekDataPrevDay(); 
+          
+          $("#chart_range").text(weekLabelsforChart[0].substr(0,10)+" ~ "+weekLabelsforChart[weekLabelsforChart.length-1].substr(0,10));       
+          myChartRightHand.update();          
+          myChartLeftHand.update();                   
+          
+        } else if (chartRange==1) { // move prev one week
+          console.log("Move to Prev week");  
+          for (var i=0; i<7; i++) getMonthDataPrevDay(); 
+          
+          $("#chart_range").text(monthLabelsforChart[0].substr(0,10)+" ~ "+monthLabelsforChart[monthLabelsforChart.length-1].substr(0,10));
+          myChartRightHand.update();          
+          myChartLeftHand.update();                           
+        }
+        
+      }
+      
+      function chartMoveNext(){
+        if (chartRange==0) { // move next one day
+          console.log("Move to Next Day");
+          //simulated data
+          //weekDataForRightHand.push(Math.floor(Math.random()*50)/10+170);
+          //weekDataForRightHand.shift();
+          //myChartRightHand.update();      
+          
+          getWeekDataNextDay(); 
+          
+          $("#chart_range").text(weekLabelsforChart[0].substr(0,10)+" ~ "+weekLabelsforChart[weekLabelsforChart.length-1].substr(0,10));
+          myChartRightHand.update();          
+          myChartLeftHand.update();                     
+          
+        } else if (chartRange==1) { // move next one week
+          console.log("Move to Next week");          
+          for (var i=0; i<7;i++) getMonthDataNextDay();
+          
+          $("#chart_range").text(monthLabelsforChart[0].substr(0,10)+" ~ "+monthLabelsforChart[monthLabelsforChart.length-1].substr(0,10));
+          myChartRightHand.update();          
+          myChartLeftHand.update();                   
+        }
+                
+      }      
+      
+      function getWeekDataPrevDay(){
+        chartCenterDate -=86400000;
+        selTime = new Date(chartCenterDate-86400000*3 - UTC_delta*3600000);
+        matchFullDate=selTime.toISOString().substr(0,10);
+        //console.log(matchFullDate);          
+
+        var matched=false;  
+        var newDataForRightHand;
+        var newDataForLeftHand;
+        var newDataForDyno;
+        for (var rec in 所有量測數據) {
+          var recTime = new Date(所有量測數據[rec].measure_time - UTC_delta*3600000); 
+          var recDate = recTime.toISOString().substr(0,10);          
+
+          //if (所有量測數據[rec].measure_time.substr(0,10)==matchFullDate){
+          if (recDate==matchFullDate){
+            newDataForRightHand=parseFloat(所有量測數據[rec].dynoRightHand);
+            newDataForLeftHand=parseFloat(所有量測數據[rec].dynoLeftHand);
+            //newDataForDyno   =parseFloat(所有量測數據[rec].bmi);
+            matched=true;
+            //console.log("matched");
+          }            
+        }
+
+        if (!matched) {
+          newDataForRightHand=null;
+          newDataForLeftHand=null;
+          newDataForDyno   =null; 
+          //console.log("not matched");
+        }          
+
+        if (chartRange==0){
+          weekDataForRightHand.unshift(newDataForRightHand);          
+          weekDataForLeftHand.unshift(newDataForLeftHand);          
+          weekDataForDyno.unshift(newDataForDyno); 
+          weekLabelsforChart.unshift(matchFullDate);
+          weekDataForRightHand.pop();          
+          weekDataForLeftHand.pop();          
+          weekDataForDyno.pop(); 
+          weekLabelsforChart.pop();                         
+        }         
+      }
+      
+      function getWeekDataNextDay(){
+        chartCenterDate +=86400000;
+        selTime = new Date(chartCenterDate+86400000*3 - UTC_delta*3600000);
+        matchFullDate=selTime.toISOString().substr(0,10);        
+        //console.log(matchFullDate);          
+
+        var matched=false;  
+        var newDataForRightHand;
+        var newDataForLeftHand;
+        var newDataForDyno;
+        for (var rec in 所有量測數據) {
+          var recTime = new Date(所有量測數據[rec].measure_time - UTC_delta*3600000); 
+          var recDate = recTime.toISOString().substr(0,10);          
+
+          //if (所有量測數據[rec].measure_time.substr(0,10)==matchFullDate){
+          if (recDate==matchFullDate){  
+            newDataForRightHand=parseFloat(所有量測數據[rec].dynoRightHand);
+            newDataForLeftHand=parseFloat(所有量測數據[rec].dynoLeftHand);
+            //newDataForDyno   =parseFloat(所有量測數據[rec].bmi);
+            matched=true;
+            //console.log("matched");
+          }            
+        }
+
+        if (!matched) {
+          newDataForRightHand=null;
+          newDataForLeftHand=null;
+          newDataForDyno   =null; 
+          //console.log("not matched");
+        }          
+
+        if (chartRange==0){
+          weekDataForRightHand.push(newDataForRightHand);          
+          weekDataForLeftHand.push(newDataForLeftHand);          
+          weekDataForDyno.push(newDataForDyno); 
+          weekLabelsforChart.push(matchFullDate);
+          weekDataForRightHand.shift();          
+          weekDataForLeftHand.shift();          
+          weekDataForDyno.shift(); 
+          weekLabelsforChart.shift();                        
+        } 
+      }
+      
+      
+      function getMonthDataPrevDay(){
+        chartCenterDate -=86400000;
+        monthBeginDate= new Date(monthLabelsforChart[0].substr(0,10));
+        selTime = new Date(monthBeginDate.getTime() - 86400000);
+        matchFullDate=selTime.toISOString().substr(0,10);
+        //console.log(matchFullDate);          
+
+        var matched=false;  
+        var newDataForRightHand;
+        var newDataForLeftHand;
+        var newDataForDyno;
+        for (var rec in 所有量測數據) {
+          var recTime = new Date(所有量測數據[rec].measure_time - UTC_delta*3600000); 
+          var recDate = recTime.toISOString().substr(0,10);           
+
+          //if (所有量測數據[rec].measure_time.substr(0,10)==matchFullDate){
+          if (recDate==matchFullDate){
+            newDataForRightHand=parseFloat(所有量測數據[rec].dynoRightHand);
+            newDataForLeftHand=parseFloat(所有量測數據[rec].dynoLeftHand);
+            //newDataForDyno   =parseFloat(所有量測數據[rec].bmi);
+            matched=true;
+            //console.log("matched");
+          }            
+        }
+
+        if (!matched) {
+          newDataForRightHand=null;
+          newDataForLeftHand=null;
+          newDataForDyno   =null; 
+          //console.log("not matched");
+        }          
+
+        monthDataForRightHand.unshift(newDataForRightHand);          
+        monthDataForLeftHand.unshift(newDataForLeftHand);          
+        monthDataForDyno.unshift(newDataForDyno); 
+        monthLabelsforChart.unshift(matchFullDate);
+        monthDataForRightHand.pop();          
+        monthDataForLeftHand.pop();          
+        monthDataForDyno.pop(); 
+        monthLabelsforChart.pop();                         
+                
+      }
+            
+
+      function getMonthDataNextDay(){
+        chartCenterDate +=86400000;
+        monthEndDate= new Date(monthLabelsforChart[monthLabelsforChart.length-1].substr(0,10));
+        selTime = new Date(monthEndDate.getTime() + 86400000);
+        matchFullDate=selTime.toISOString().substr(0,10);
+        //console.log(matchFullDate);         
+
+        var matched=false;  
+        var newDataForRightHand;
+        var newDataForLeftHand;
+        var newDataForDyno;      
+        for (var rec in 所有量測數據) {
+          var recTime = new Date(所有量測數據[rec].measure_time - UTC_delta*3600000); 
+          var recDate = recTime.toISOString().substr(0,10); 
+          
+          //if (所有量測數據[rec].measure_time.substr(0,10)==matchFullDate){
+          if (recDate==matchFullDate){          
+            newDataForRightHand=parseFloat(所有量測數據[rec].dynoRightHand);
+            newDataForLeftHand=parseFloat(所有量測數據[rec].dynoLeftHand);
+            //newDataForDyno   =parseFloat(所有量測數據[rec].bmi);        
+            matched=true;
+            //console.log("matched");
+          }            
+        }
+
+        if (!matched) {
+          newDataForRightHand=null;
+          newDataForLeftHand=null;
+          newDataForDyno   =null; 
+          //console.log("not matched");
+        }          
+
+        monthDataForRightHand.push(newDataForRightHand);          
+        monthDataForLeftHand.push(newDataForLeftHand);          
+        monthDataForDyno.push(newDataForDyno); 
+        monthLabelsforChart.push(matchFullDate);
+        monthDataForRightHand.shift();          
+        monthDataForLeftHand.shift();          
+        monthDataForDyno.shift(); 
+        monthLabelsforChart.shift();                        
+
+      }
+            
+      
+      function getDataOfAweek(reqDate){
+        keyOfMeasurements=Object.keys(所有量測數據);      
+        weekLabelsforChart=[];
+        weekDataForRightHand=[];
+        weekDataForLeftHand=[];
+        weekDataForDyno=[];
+        for (var i=-3; i<4; i++) { // 從選擇日前四天到後兩天
+          selTime = new Date(reqDate - UTC_delta*3600000 + i*86400000);          
+          matchFullDate = selTime.toISOString().substr(0,10);
+          //console.log(matchFullDate);
+                
+          var matched=false;          
+          for (var rec in 所有量測數據) {
+            var recTime = new Date(所有量測數據[rec].measure_time - UTC_delta*3600000); 
+            var recDate = recTime.toISOString().substr(0,10);
+            
+            //if (所有量測數據[rec].measure_time.substr(0,10)==matchFullDate){
+            if (recDate==matchFullDate){
+              //weekLabelsforChart.push(所有量測數據[rec].measure_time);
+              weekLabelsforChart.push(matchFullDate);
+              
+              weekDataForRightHand.push(parseFloat(所有量測數據[rec].dynoRightHand));
+              weekDataForLeftHand.push(parseFloat(所有量測數據[rec].dynoLeftHand));
+              //weekDataForDyno.push(parseFloat(所有量測數據[rec].bmi));
+              matched=true;
+            }            
+          }
+          if (!matched) {
+            weekLabelsforChart.push(matchFullDate);
+            weekDataForRightHand.push(null);          
+            weekDataForLeftHand.push(null);          
+            weekDataForDyno.push(null);          
+          }
+        }
+        
+        console.log(weekDataForRightHand);        
+        console.log(weekDataForLeftHand);        
+        console.log(weekDataForDyno);        
+      }
+      
+      function getDataOfAmonth(reqDate){
+        keyOfMeasurements=Object.keys(所有量測數據);
+        monthLabelsforChart=[];
+        monthDataForRightHand=[];
+        monthDataForLeftHand=[];
+        monthDataForDyno=[];     
+        
+        for (var i=-15; i<16; i++) { 
+          selTime = new Date(reqDate - UTC_delta*3600000+ i*86400000);
+          //console.log(selTime.toISOString());
+          matchFullDate = selTime.toISOString().substr(0,10);
+          //console.log(matchFullDate);
+                
+          var matched=false;          
+          for (var rec in 所有量測數據) {
+            var recTime = new Date(所有量測數據[rec].measure_time - UTC_delta*3600000);          
+            var recDate = recTime.toISOString().substr(0,10);            
+
+            //if (所有量測數據[rec].measure_time.substr(0,10)==matchFullDate){
+            if (recDate==matchFullDate){  
+              monthLabelsforChart.push(matchFullDate);
+              
+              monthDataForRightHand.push(parseFloat(所有量測數據[rec].dynoRightHand));
+              monthDataForLeftHand.push(parseFloat(所有量測數據[rec].dynoLeftHand));
+              //monthDataForDyno.push(parseFloat(所有量測數據[rec].bmi));
+              matched=true;
+            }            
+          }
+          if (!matched) {
+            monthLabelsforChart.push(matchFullDate);
+            monthDataForRightHand.push(null);          
+            monthDataForLeftHand.push(null);          
+            monthDataForDyno.push(null);          
+          }
+        }
+        
+        console.log(monthDataForRightHand);        
+        console.log(monthDataForLeftHand);        
+        console.log(monthDataForDyno);        
+      }
+      
+
+      function getDataOfAll(){
+      
+        allLabelsforChart=[];
+        allDataForRightHand=[];
+        allDataForLeftHand=[];
+        allDataForDyno=[];
+        
+        for (var rec in 所有量測數據) {
+            var recTime = new Date(所有量測數據[rec].measure_time - UTC_delta*3600000);          
+            var recDate = recTime.toISOString().substr(0,10);            
+
+            allLabelsforChart.push(recDate);
+          
+            allDataForRightHand.push(parseFloat(所有量測數據[rec].dynoRightHand));
+            allDataForLeftHand.push(parseFloat(所有量測數據[rec].dynoLeftHand));
+            //allDataForDyno.push(parseFloat(所有量測數據[rec].bmi));
+                     
+        }
+
+        console.log(allLabelsforChart);        
+        console.log(allDataForRightHand);        
+        console.log(allDataForLeftHand);        
+        console.log(allDataForDyno);        
+      }
+            
+      function drawChart(){
+        
+        $("#chart_range").text(weekLabelsforChart[0].substr(0,10)+" ~ "+weekLabelsforChart[weekLabelsforChart.length-1].substr(0,10));
+                
+        ctxRH = $('#myChartRightHand');
+        myChartRightHand = new Chart(ctxRH, {           
+          type: 'line',
+          data: {
+            //labels: ['S', 'M', 'T', 'W', 'T', 'F', 'S'],
+            labels: weekLabelsforChart,
+            datasets: [{
+              backgroundColor: [
+                'rgba(99, 128, 64, 0.9)'
+              ],
+              label: '右手握力(kg)',
+              cubicInterpolationMode: 'monotone',                
+              data: weekDataForRightHand
+            }]
+          },
+          options: {
+            scales: {
+              x: {
+                display:true,
+                  ticks: {
+                    count:7,
+                    // Include a dollar sign in the ticks
+                    callback: function(value, index, ticks) {
+                      if (chartRange==0) {
+                        if (index==0 || index==3 ||index==6) return weekLabelsforChart[index].substr(5, 5);
+                        else return '';
+                      } 
+                    }
+                  }
+              },
+              y: {
+//                  ticks: {
+//                    callback: function(value, index, ticks) {
+//                        return value+'公分';
+//                    }
+//                  }
+              }                
+            }
+          }            
+        });    
+
+        ctxLH = $('#myChartLeftHand');
+        myChartLeftHand = new Chart(ctxLH, {
+          type: 'line',
+          data: {
+            //labels: ['S', 'M', 'T', 'W', 'T', 'F', 'S'],
+            labels: weekLabelsforChart,
+            datasets: [{
+              backgroundColor: [
+                'rgba(255, 99, 132, 0.9)'
+              ],
+              label: '左手握力(kg)',
+              cubicInterpolationMode: 'monotone',
+              data: weekDataForLeftHand
+            }]
+          },
+          options: {
+            scales: {
+              x: {
+                display:true,
+                  ticks: {
+                    count:7,
+                    callback: function(value, index, ticks) {
+                      if (chartRange==0) {
+                        if (index==0 || index==3 ||index==6) return weekLabelsforChart[index].substr(5, 5);
+                        else return '';
+                      }                      
+                    }
+                  }
+              },
+              y: {           
+                ticks:{
+//                  count:10
+//                    callback: function(value, index, ticks) {
+//                        return ' '+value;
+//                    }
+                }
+              }                
+            }
+          } 
+        });
+
+      }      
+            
+    </script>
+    
+    <script>
+      //以下必須 remark 掉，不然會有問題
+      //var app = new kendo.mobile.Application(document.body, { skin: "nova" });
+    </script>
+
+  </body>
+</html>
