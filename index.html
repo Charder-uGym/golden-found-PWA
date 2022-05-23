@@ -13,7 +13,7 @@
 
   <!-- LINE Opengraph https://developers.line.biz/en/faq/tags/media/#how-are-the-url-previews-generated -->
 <!--  <meta property="og:image" content="https://raw.githubusercontent.com/forgeFitnessUgym/bodyMeasureLINE/master/ForgeLogo%E5%A4%A7.png" />  -->
-  <meta property="og:title" content="握力量測" />
+  <meta property="og:title" content="量測紀錄系統" />
   <meta property="og:description" content=""/>
   <!-- End LINE Opengraph -->
    
@@ -21,21 +21,34 @@
 
   <!--  using Noto Sans TC is added by Paul Kang-->
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC&display=swap" rel="stylesheet">
-
+  
+<!--  <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>  -->
+  <script src="js/jquery-1.12.4.min.js"></script>
+  
+<!--
   <link href="https://kendo.cdn.telerik.com/2020.1.114/styles/kendo.common-nova.min.css" rel="stylesheet" />
   <link href="https://kendo.cdn.telerik.com/2020.1.114/styles/kendo.nova.min.css" rel="stylesheet" />
-  <link href="https://kendo.cdn.telerik.com/2020.1.114/styles/kendo.mobile.nova.min.css" rel="stylesheet" />   
-
-  <link href="css/courseStyle.css" rel="stylesheet" />
-     
-  <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+  <link href="https://kendo.cdn.telerik.com/2020.1.114/styles/kendo.mobile.nova.min.css" rel="stylesheet" />       
   <script src="https://kendo.cdn.telerik.com/2020.1.114/js/kendo.all.min.js"></script>
   <script src="https://kendo.cdn.telerik.com/2020.1.114/js/kendo.timezones.min.js"></script>
+-->
   
+  <link href="css/kendo.common-nova.min.css" rel="stylesheet" />    
+  <link href="css/kendo.nova.min.css" rel="stylesheet" />  
+  <link href="css/kendo.mobile.nova.min.css" rel="stylesheet" />     
+  <script src="js/kendo.all.min.js"></script>
+  <script src="js/kendo.timezones.min.js"></script>  
+    
+<!--
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">   
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
-  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>  
+-->
+  <link rel="stylesheet" href="css/font-awesome_all.min.css">   
+  <script src="js/chart.js"></script>    
+  <script src="js/JsBarcode.all.min.js"></script>   
   
+  <link href="css/courseStyle.css" rel="stylesheet" />  
   <link rel="stylesheet" href="css/loading.css" />
   <script src="js/loading.js"></script>    
   
@@ -52,7 +65,7 @@
 
     .km-on-ios .km-header .km-navbar
     {
-      background-color: red; /*darkslategray;*/
+      background-color:crimson; /*darkslategray;*/
       /* deeppink; */
       font-size: 16px;
     }
@@ -122,15 +135,16 @@
   </style>
   
   <div id="errorMessage" style="display: none; margin-top: 2em; color: red; font-weight: bold" align="center">
-    <h3 class="NotoSansFont" style="margin-top: 2em; color: darkslategray; font-weight: bold">握力量測 V0.9e</h3>
+    <h3 class="NotoSansFont" style="margin-top: 2em; color: darkslategray; font-weight: bold">量測紀錄系統</h3>
   </div>
     
-  <div data-role="view" data-title="握力量測 V0.9e" style="font-family: 'Noto Sans TC'" id="mainDiv" data-layout="" data-reload="false" data-show="mainReady()">
+  <div data-role="view" data-title="量測紀錄系統" style="font-family: 'Noto Sans TC'" id="mainDiv" data-layout="" data-reload="false" data-show="mainReady()">
     <header id="header" data-role="header">
       <div data-role="navbar" id="normal" class="km-accent">
 
         <img src="金機.png" style="float:left; margin-top:15px; height:25px; margin-left:-15px">
-        <a style="float:left; margin-left:20px; color:white">握力量測 V0.9e</a>
+        <a style="float:left; margin-left:20px; color:white">量測紀錄系統 
+          <span style="font-size:12px">V1.0</span></a>
         <a data-align="right" data-role="button" href="#forms" data-rel="" data-icon="contacts"></a>
         
 <!--        <span data-role="view-title"></span>--> 
@@ -143,8 +157,8 @@
    
 <!--    On iPhone SE: height = vh(667px)-header height(53px)-menu height(301px)=313px-->
     <div data-role="content" style="background-color: black; margin-top:0px"> 
-      <div id="dialog" style="background-color:green; height:313px">
-        
+      <div id="dialog" style="background-color:black; height:313px">
+        <div style="color:white; padding:20px; font-size:20px">最新消息</div><hr>
       </div>
     </div>
     
@@ -153,7 +167,7 @@
     </button>
     
     <footer style="">
-      <img id="menu" src="menu.jpg" style="width:100vw;">      
+      <img id="menu" src="menu.png" style="width:100vw;">      
     </footer>
         
 <!--
@@ -304,16 +318,33 @@
             
     // checkInputParam() 和 checkUserIdExist() 都是在 functions.js 定義
     console.log("check User");
-    if (checkInputParam()) checkUserIdExist();
+    //if (checkInputParam()) checkUserIdExist();
     
-    var userPicArr=inputParam[2].split('=');
+    //var userPicArr=inputParam[2].split('=');
         
     // Move 讀取店面名稱和機器序號 into checkUserIdExist()
   
     //app.navigate('#forms');
     
-    function mainReady(){
-      console.log("hay", $("#dummy").css("height"));
+
+    
+    function mainReady(){    
+
+      
+      $("#menu").load(function() {
+        var viewHeight=parseInt($("#dummy").css("height"));
+        console.log("all height", viewHeight);
+        var menuHeight=parseInt($("#menu").css("height"));
+        console.log("menu height", menuHeight);  
+        var headerHeight=53;        
+        var dialogHeight=viewHeight-menuHeight-headerHeight
+        console.log("dialog height", dialogHeight);
+        
+        $("#dialog").css("height", dialogHeight.toString()+"px");
+        
+        
+      }).attr('src', 'menu.png');      
+      
     }
 
   </script>
