@@ -1,7 +1,5 @@
 <!--https://demos.telerik.com/kendo-ui/content/shared/js/mobile-examples.js-->
-<!--?displayName=小華&userId=U722be0c9c9d36e011c0e556bd2047819&pictureUrl=www.google.com-->
-<!--?displayName=小A&userId=U72Abe0c9c9d36e011c0e556bd2047819&pictureUrl=https://media.tractorsupply.com/is/image/TractorSupplyCompany/1305371?$456$  -->
-<!--?displayName=Paul%20Kang&userId=U8570ed5006325d504933612308d0fddf&pictureUrl=https://profile.line-scdn.net/0m00af3784725150d454061f6166cf75d95eb255c87861    -->
+<!--?Name=kpc&UserId=xyz123&PicUrl=xqwe.placeholder.com -->
     
 <!DOCTYPE html>
 <html>  
@@ -223,16 +221,18 @@
 
     </header>
     
+    <!--for getting viewport height-->
     <div id="dummy" style="display:none; height:100vh"></div>
    
-    <!--On iPhone SE: information height = vh(667px)-header height(53px)-menu height(301px)=313px-->
+    <!--On iPhone SE: newsContent height = vh(667px)-header height(53px)-menu height(301px)=313px-->
     <div data-role="content" style="background-color: black; margin-top:0px"> 
-      <div id="information" style="background-color:black; height:313px">
+      <div id="newsContent" style="background-color:black; height:313px">
         <div style="color:white; padding:10px; font-size:20px">最新消息</div><hr>
+        <div id="news" style="color:white">AAA</div>
       </div>
     </div>
     
-    <!--    top:430px = header(53)+information(313)+buffer(11)-->
+    <!--    top:430px = header(53)+newsContent(313)+buffer(11)-->
 <!--
     <button id="身組button" onclick="alert('身組')" style="position:absolute; background-color:transparent; top:430px; width:30vw; height:313px; border:none">  
         
@@ -246,7 +246,7 @@
     
     <footer class="container">
       <img id="menu" src="menu.png" style="width:100vw;">  
-      <button id="量測身組按鈕" onclick="alert('量測身組按鈕')" class="btn1"></button>    
+      <button id="量測身組按鈕" onclick="window.open('https://www.w3schools.com');" class="btn1"></button>    
       <button id="量測握力按鈕" onclick="alert('量測握力按鈕')" class="btn2"></button>    
       <button id="量測hwBMI按鈕" onclick="alert('量測hwBMI按鈕')" class="btn3"></button>    
       <button id="查詢hwBMI按鈕" onclick="alert('查詢hwBMI按鈕')" class="btn4"></button>    
@@ -405,8 +405,11 @@
     console.log("check User");
     //if (checkInputParam()) checkUserIdExist();
     
-    //var userPicArr=inputParam[2].split('=');
-        
+    checkInputParam();
+    console.log(displayName, userId, pictureUrl);
+    
+    $("#news").text(displayName[1]+userId[1]+pictureUrl[1]);
+    
     // Move 讀取店面名稱和機器序號 into checkUserIdExist()
   
     //app.navigate('#forms');
@@ -422,10 +425,10 @@
         var menuHeight=parseInt($("#menu").css("height"));
         console.log("menu height", menuHeight);  
         var headerHeight=53;        
-        var informationHeight=viewHeight-menuHeight-headerHeight
-        console.log("information height", informationHeight);
+        var newsContentHeight=viewHeight-menuHeight-headerHeight
+        console.log("newsContent height", newsContentHeight);
         
-        $("#information").css("height", informationHeight.toString()+"px");       
+        $("#newsContent").css("height", newsContentHeight.toString()+"px");       
         
       }).attr('src', 'menu.png');      
       
