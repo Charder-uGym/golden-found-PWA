@@ -4,10 +4,13 @@
 <!--?displayName=Paul%20Kang&userId=U8570ed5006325d504933612308d0fddf&pictureUrl=https://profile.line-scdn.net/0m00af3784725150d454061f6166cf75d95eb255c87861    -->
     
 <!DOCTYPE html>
-<html>
+<html>  
 
 <head>
-  <script> var useLocalAPIs = false; </script>
+  <script> 
+    var app_ver="v0.2";   
+    var useLocalAPIs = false; 
+  </script>
   
   <title></title>
 
@@ -132,6 +135,72 @@
     #calendar .k-content {
         width: 100%;
     }    
+    
+    /* Container needed to position the button. Adjust the width as needed */
+    .container {
+      position: relative;
+      width: 100vw;
+    }
+
+    /* Make the image responsive */
+    .container img {
+      width: 100%;
+      height: auto;
+    }
+
+    /* Style the button and place it in the middle of the container/image */
+    .container .btn1 {
+      position: absolute;
+      top: 50%;
+      left: 16%;
+      width: 30%;
+      height: 90%;
+      transform: translate(-50%, -50%);
+      -ms-transform: translate(-50%, -50%);
+      background-color: transparent;
+      color: white;
+      border: none;
+    }
+
+    .container .btn2 {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 30%;
+      height: 90%;
+      transform: translate(-50%, -50%);
+      -ms-transform: translate(-50%, -50%);
+      background-color: transparent;
+      color: white;
+      border: none;
+    }    
+    
+    .container .btn3 {
+      position: absolute;
+      top: 25%;
+      left: 84%;
+      width: 30%;
+      height: 40%;
+      transform: translate(-50%, -50%);
+      -ms-transform: translate(-50%, -50%);
+      background-color: transparent;
+      color: white;
+      border: none;
+    }    
+    
+    .container .btn4 {
+      position: absolute;
+      top: 75%;
+      left: 84%;
+      width: 30%;
+      height: 40%;
+      transform: translate(-50%, -50%);
+      -ms-transform: translate(-50%, -50%);
+      background-color: transparent;
+      color: white;
+      border: none;
+    }     
+
   </style>
   
   <div id="errorMessage" style="display: none; margin-top: 2em; color: red; font-weight: bold" align="center">
@@ -144,7 +213,7 @@
 
         <img src="金機.png" style="float:left; margin-top:15px; height:25px; margin-left:-15px">
         <a style="float:left; margin-left:20px; color:white">量測紀錄系統 
-          <span style="font-size:12px">V0.1</span></a>
+          <span id="app_ver" style="font-size:12px"></span></a>
         <a data-align="right" data-role="button" href="#forms" data-rel="" data-icon="contacts"></a>
         
        <!-- 頁面裡的 Title, 與 header 的 title 重複 <span data-role="view-title"></span>--> 
@@ -163,6 +232,7 @@
     </div>
     
     <!--    top:430px = header(53)+information(313)+buffer(11)-->
+<!--
     <button id="身組button" onclick="alert('身組')" style="position:absolute; background-color:transparent; top:430px; width:30vw; height:313px; border:none">  
         
     <button id="握力button" onclick="alert('握力')" style="position:absolute; background-color:transparent; top:430px;  left: 34vw; width:30vw; height:313px; border:none">  
@@ -171,9 +241,14 @@
         
     <button id="查詢hwBMIbutton" onclick="alert('查詢hwBMI')" style="position:absolute; background-color:transparent; top:560px;  left: 68vw; width:30vw; height:110px; border:none">      
     </button>
+-->
     
-    <footer style="">
-      <img id="menu" src="menu.png" style="width:100vw;">      
+    <footer class="container">
+      <img id="menu" src="menu.png" style="width:100vw;">  
+      <button id="量測身組按鈕" onclick="alert('量測身組按鈕')" class="btn1"></button>    
+      <button id="量測握力按鈕" onclick="alert('量測握力按鈕')" class="btn2"></button>    
+      <button id="量測hwBMI按鈕" onclick="alert('量測hwBMI按鈕')" class="btn3"></button>    
+      <button id="查詢hwBMI按鈕" onclick="alert('查詢hwBMI按鈕')" class="btn4"></button>    
     </footer>
         
 <!--
@@ -293,6 +368,9 @@
   <script src="js/prettify.js"></script> 
   
   <script>
+    
+    $("#app_ver").text(app_ver);
+    
     // 中光電竹南廠
     var 場所位置1緯度=  24.7118; 
     var 場所位置1經度= 120.9162;
@@ -346,37 +424,12 @@
         var informationHeight=viewHeight-menuHeight-headerHeight
         console.log("information height", informationHeight);
         
-        $("#information").css("height", informationHeight.toString()+"px");
-        
-        var buttonTop=headerHeight+informationHeight+menuHeight*0.05; //0.04menu is buffer
-        $("#身組button").css("top",       buttonTop.toString()+"px");
-        $("#握力button").css("top",       buttonTop.toString()+"px");
-        $("#hwBMIbutton").css("top",     buttonTop.toString()+"px");
-        $("#查詢hwBMIbutton").css("top", (buttonTop+0.5*menuHeight).toString()+"px");
-        
-        $("#身組button").css("left",      "1.5vw");
-        $("#握力button").css("left",      "35vw");
-        $("#hwBMIbutton").css("left",     "68vw");
-        $("#查詢hwBMIbutton").css("left", "68vw");     
-        
-        $("#身組button").css("height",      (menuHeight*0.9).toString()+"px");        
-        $("#握力button").css("height",      (menuHeight*0.9).toString()+"px");        
-        $("#hwBMIbutton").css("height",    (menuHeight*0.4).toString()+"px");        
-        $("#查詢hwBMIbutton").css("height", (menuHeight*0.4).toString()+"px");        
+        $("#information").css("height", informationHeight.toString()+"px");       
         
       }).attr('src', 'menu.png');      
       
     }  
-
-//    <!--    top:430px = header(53)+information(313)+buffer(11)-->
-//    <button id="身組button" onclick="alert('身組')" style="position:absolute; background-color:transparent; top:430px; width:30vw; height:313px; border:none">  
-//        
-//    <button id="握力button" onclick="alert('握力')" style="position:absolute; background-color:transparent; top:430px;  left: 34vw; width:30vw; height:313px; border:none">  
-//        
-//    <button id="hwBMIbutton" onclick="alert('hwBMI')" style="position:absolute; background-color:transparent; top:430px;  left: 68vw; width:30vw; height:110px; border:none">  
-//        
-//    <button id="查詢hwBMIbutton" onclick="alert('查詢hwBMI')" style="position:absolute; background-color:transparent; top:560px;  left: 68vw; width:30vw; height:110px; border:none">      
-//    </button>    
+   
   </script>
 </body>
 
