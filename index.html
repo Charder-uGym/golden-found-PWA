@@ -7,7 +7,7 @@
 <head>
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <script> 
-    var app_ver="v0.2a";   
+    var app_ver="v0.2b";   
     var useLocalAPIs = false; 
   </script>
   
@@ -225,7 +225,7 @@
     <div id="dummy" style="display:none; height:100vh"></div>
    
     <!--On iPhone SE: newsContent height = vh(667px)-header height(53px)-menu height(301px)=313px-->
-    <div data-role="content" style="background-color: black; margin-top:0px"> 
+    <div data-role="scroller" style="background-color: black; color:white; margin-top:0px"  data-pull-to-refresh="true" data-pull-offset="20" data-pull="pullNews"> 
       <div id="newsContent" style="background-color:black; height:313px">
         <div style="color:white; padding:10px; font-size:20px">最新消息</div><hr>
         <div id="news" style="color:white">AAA</div>
@@ -434,6 +434,12 @@
       
     }  
    
+    function pullNews() {
+      console.log("pull for news");
+      $.loading.start("取得最新消息");
+      
+      setTimeout(function() {$.loading.end()}, 500);
+    }
   </script>
 </body>
 
